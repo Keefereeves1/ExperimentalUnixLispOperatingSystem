@@ -1,0 +1,716 @@
+	(defpackage :posix)
+(in-package :posix)
+
+(defun make-integer (n)
+ "Converts a number to an integer."
+ (if (numberp n)
+      n
+      (values nil error "~S: not a number" n)))
+
+(defun exit (status)
+ "Terminates the program with the specified status."
+ (declare (ignore status))
+ (error "exit: Terminated by the operating system"))
+
+(defun getpid ()
+ "Returns the process ID of the current process."
+ (declare (ftype (function) (values (make-integer 32))))
+ (sys:getpid))
+
+(defun kill (pid signum)
+ "Kills the process with the specified process ID."
+ (declare (in) (values (make-integer 32)))
+ (sys:kill (- (getpid) (ash 10 signum)))
+ (values t nil))
+
+(defun read (fd)
+ "Reads a single character from the file descriptor fd."
+ (declare (in) (ftype (function) (values (make-integer 32) (make-integer 
+32))))
+ (sys:read fd))
+
+(defun write (fd ch)
+ "Writes a single character to the file descriptor fd."
+ (declare (in) (in) (ftype (function) (values (make-integer 32) 
+(make-integer 32))))
+ (sys:write fd ch))
+
+(defun waitpid (pid options status)
+ "Waits for the specified process to exit, then returns its status."
+ (declare (in) (in) (in) (in))
+ (sys:waitpid pid options status))
+
+(defun wait (&key (seconds 0.0) (milliseconds 0))
+ "Waits for the specified number of seconds or milliseconds."
+ (declare (ignore seconds) (ignore milliseconds) (ftype (function) (values 
+(make-integer 32))))
+ (sys:usleep (/ (expt 60 seconds 3) 1000)
+              (/ (expt 60 milliseconds 3) 10)))
+
+(defun fork ()
+ "Forks the current process into a child process."
+ (declare (ftype (function) (make-integer 32)))
+ (sys:fork))
+
+(defun pipe ()
+ "Creates a pipe."
+ (declare (ftype (function) (in-output-stream)))
+ (let ((r (open-output-channel :element-type '(unsigned-byte 8))))
+   (values (values r (open-input-channel :element-type '(unsigned-byte 
+8))))))
+
+(defun open (path mode)
+ "Opens a file descriptor for the specified path and mode."
+ (declare (in) (in) (in))
+ (sys:open path mode))
+
+(defun close (fd)
+ "Closes the file descriptor fd."
+ (declare (in) (in))
+ (sys:close fd))
+
+(defun dup2 (old new)
+ "Duplicates file descriptor old to file descriptor new."
+ (declare (in) (in) (in))
+ (sys:dup2 old new))
+
+(defun execve (program argv environment)
+ "Replaces the current process image with the program specified by path."
+ (declare (in) (in) (in) (in) (in))
+ (sys:execve program argv environment))
+
+(defun chdir (path)
+ "Changes the current working directory to path."
+ (declare (in) (in))
+ (sys:chdir path))
+
+(defun umask (mask)
+ "Sets the current file creation mask to mask."
+ (declare (in) (in))
+ (sys:umask mask))
+
+(defun uname (info-type)
+ "Obtains information about the current process and/or system."
+ (declare (in) (in))
+ (sys:uname info-type))
+
+(defun getppid ()
+ "Returns the process ID of the process that most recently called fork."
+ (declare (ftype (function) (values (make-integer 32))))
+ (sys:getppid))
+
+(defun getegid ()
+ "Returns the effective group ID of the current process."
+ (declare (ftype (function) (values (make-integer 32))))
+ (sys:getegid))
+
+(defun geteuid ()
+ "Returns the effective user ID of the current process."
+ (declare (ftype (function) (values (make-integer 32))))
+ (sys:geteuid))
+
+(defun getgid ()
+ "Returns the group ID of the current process."
+ (declare (ftype (function) (values (make-integer 32))))
+ (sys:getgid))
+
+(defun getuid ()
+ "Returns the user ID of the current process."
+ (declare (ftype (function) (values (make-integer 32))))
+ (sys:getuid))
+
+(defun setsid ()
+ "Makes the calling process a session leader."
+ (declare (ftype (function) (values (make-integer 32))))
+ (sys:setsid))
+
+(defun ioctl (fd request argument)
+ "Performs a low-level system call on the specified file descriptor."
+ (declare (in) (in) (in) (in))
+ (sys:ioctl fd request argument))
+
+(defun alarm (seconds)
+ "Sets an alarm for the specified number of seconds from now."
+ (declare (in) (in))
+ (sys:alarm seconds))
+
+(defun read (fd buf)
+ "Reads up to len characters from the specified file descriptor fd."
+ (declare (in) (in) (in) (in))
+ (sys:read fd buf))
+
+(defun writev (fd iov)
+ "Writes the elements of the vector iov to the specified file descriptor 
+fd."
+ (declare (in) (in) (in) (in))
+ (sys:writev fd iov))
+
+(defun accept (fd)
+ "Accepts a connection on the specified file descriptor fd."
+ (declare (in) (in))
+ (sys:accept fd))
+
+(defun connect (fd sockaddr len)
+ "Connects the specified file descriptor fd to the socket address 
+sockaddr."
+ (declare (in) (in) (in) (in))
+ (sys:connect fd sockaddr len))
+
+(defun sendv (fd iov)
+ "Sends the elements of the vector iov over the specified file descriptor 
+fd."
+ (declare (in) (in) (in) (in))
+ (sys:sendv fd iov))
+
+(defun recvv (fd iov max-len)
+ "Receives up to max-len characters from the specified file descriptor 
+fd."
+ (declare (in) (in) (in) (in))
+ (sys:recvv fd iov max-len))
+
+(defun sendto (fd iov sockaddr len)
+ "Sends the elements of the vector iov to the socket address sockaddr."
+ (declare (in) (in) (in) (in) (in))
+ (sys:sendto fd iov sockaddr len))
+
+(defun recvfrom (fd buf len flags)
+ "Receives up to len characters from the specified file descriptor fd."
+ (declare (in) (in) (in) (in) (in))
+ (sys:recvfrom fd buf len flags))
+
+(defun select (read-fds max-fd write-fds max-write-fd timeout)
+ "Waits for input to become available on the file descriptors in the 
+arrays read-fds and write-fds."
+ (declare (in) (in) (in) (in) (in))
+ (sys:select read-fds max-fd write-fds max-write-fd timeout))
+
+(defun getpeername (fd)
+ "Retrieves the peer name of the connection associated with the specified 
+file descriptor fd."
+ (declare (in) (in))
+ (sys:getpeername fd))
+
+(defun getsockname (fd)
+ "Retrieves the local address of the connection associated with the 
+specified file descriptor fd."
+ (declare (in) (in))
+ (sys:getsockname fd))
+
+(defun shutdown (fd how)
+ "Shuts down the specified file descriptor fd."
+ (declare (in) (in) (in))
+ (sys:shutdown fd how))
+
+(defun getprotobyname (name)
+ "Retrieves the protocol number for the named protocol."
+ (declare (in) (in))
+ (sys:getprotobyname name))
+
+(defun getprotobynumber (number)
+ "Retrieves the protocol name for the specified protocol number."
+ (declare (in) (in))
+ (sys:getprotobynumber number))
+
+(defun getservbyname (name proto)
+ "Retrieves the server name and protocol number for the named service."
+ (declare (in) (in) (in))
+ (sys:getservbyname name proto))
+
+(defun getservbyport (port proto)
+ "Retrieves the server name and protocol number for the specified port."
+ (declare (in) (in) (in))
+ (sys:getservbyport port proto))
+
+(defun getrlimit (resource)
+ "Retrieves the resource limit information for the current process."
+ (declare (in) (in))
+ (sys:getrlimit resource))
+
+(defun setrlimit (resource limit)
+ "Sets the resource limit for the current process."
+ (declare (in) (in) (in))
+ (sys:setrlimit resource limit))
+
+(defun umask (octet)
+ "Sets the file creation mask for the current process."
+ (declare (in) (in))
+ (sys:umask octet))
+
+(defun getuid (&key (errno *))
+ "Retrieves the real user ID of the current process."
+ (declare (in) (out))
+ (sys:getuid errno))
+
+(defun getgid (&key (errno *))
+ "Retrieves the real group ID of the current process."
+ (declare (in) (out))
+ (sys:getgid errno))
+
+(defun geteuid (&key (errno *))
+ "Retrieves the effective user ID of the current process."
+ (declare (in) (out))
+ (sys:geteuid errno))
+
+(defun getegid (&key (errno *))
+ "Retrieves the effective group ID of the current process."
+ (declare (in) (out))
+ (sys:getegid errno))
+
+(defun getppid (&key (errno *))
+ "Retrieves the parent process ID of the current process."
+ (declare (in) (out))
+ (sys:getppid errno))
+
+(defun getpgrp (&key (errno *))
+ "Retrieves the parent process group ID of the current process."
+ (declare (in) (out))
+ (sys:getpgrp errno))
+
+(defun gettid (&key (errno *))
+ "Retrieves the thread ID of the current thread."
+ (declare (in) (out))
+ (sys:gettid errno))
+
+(defun getpgid (tid &key (errno *))
+ "Retrieves the process group ID of the thread with the specified thread 
+ID."
+ (declare (in) (in) (out) (out))
+ (sys:getpgid tid errno))
+
+(defun getppid (tid &key (errno *))
+ "Retrieves the parent process ID of the thread with the specified thread 
+ID."
+ (declare (in) (in) (out) (out))
+ (sys:getppid tid errno))
+
+(defun getpgrp (tid &key (errno *))
+ "Retrieves the process group ID of the thread group containing the thread 
+with the specified thread ID."
+ (declare (in) (in) (out) (out))
+ (sys:getpgrp tid errno))
+
+(defun getrusage (who rusage)
+ "Retrieves the resource usage information for the current process or the 
+specified thread."
+ (declare (in) (in) (in) (in))
+ (sys:getrusage who rusage))
+
+(defun sysinfo (&key (errno *))
+ "Retrieves system information for the current process."
+ (declare (in) (out))
+ (sys:sysinfo errno))
+
+(defun pipe (&key (errno *))
+ "Creates a pipe, a unidirectional interprocess communication channel, and 
+returns file descriptors for both ends of the pipe."
+ (declare (in) (out) (out))
+ (sys:pipe errno))
+
+(defun pipe2 (flags)
+ "Creates a pipe, a unidirectional interprocess communication channel, and 
+returns file descriptors for both ends of the pipe."
+ (declare (in) (in))
+ (sys:pipe2 flags))
+
+(defun fcntl (fd request action)
+ "Performs a file descriptor control operation."
+ (declare (in) (in) (in) (in))
+ (sys:fcntl fd request action))
+
+(defun dup (fd)
+ "Duplicates the file descriptor fd."
+ (declare (in) (in))
+ (sys:dup fd))
+
+(defun dup2 (oldfd newfd)
+ "Duplicates the file descriptor oldfd and makes it the new file 
+descriptor newfd."
+ (declare (in) (in) (in) (in))
+ (sys:dup2 oldfd newfd))
+
+(defun close-on-exec (fd)
+ "Sets the file descriptor fd to close on exec flag."
+ (declare (in) (in))
+ (sys:fcntl fd F_SETFD_CLOEXEC))
+
+(defun close (fd)
+ "Closes the file descriptor fd."
+ (declare (in) (in))
+ (sys:close fd))
+
+(defun read (fd n)
+ "Reads up to n bytes from the file descriptor fd."
+ (declare (in) (in) (in) (in))
+ (sys:read fd n))
+
+(defun readv (fds n)
+ "Reads up to n bytes from the array of file descriptors fds."
+ (declare (in) (in) (in) (in))
+ (sys:readv fds n))
+
+(defun write (fd buf n)
+ "Writes n bytes from the buffer buf to the file descriptor fd."
+ (declare (in) (in) (in) (in))
+ (sys:write fd buf n))
+
+(defun writev (fds bufs n)
+ "Writes n bytes from the array of buffers bufs to the array of file 
+descriptors fds."
+ (declare (in) (in) (in) (in))
+ (sys:writev fds bufs n))
+
+(defun select (nfds nfds_revents tv_sec tv_usec)
+ "Waits for an event to occur on one or more file descriptors."
+ (declare (in) (in) (in) (in) (in) (in))
+ (sys:select nfds nfds_revents tv_sec tv_usec))
+
+(defun select-timed (nfds nfds_revents timeout &key (errno *))
+ "Waits for an event to occur on one or more file descriptors or for the 
+given timeout to expire."
+ (declare (in) (in) (in) (in) (in))
+ (sys:select-timed nfds nfds_revents timeout errno))
+
+(defun poll (nfds nfds_revents nfds_nfds_revents tv_sec tv_usec)
+ "Waits for an event to occur on one or more file descriptors or for the 
+given timeout to expire."
+ (declare (in) (in) (in) (in) (in) (in))
+ (sys:poll nfds nfds_revents nfds_nfds_revents tv_sec tv_usec))
+
+(defun poll-timed (nfds nfds_revents timeout &key (errno *))
+ "Waits for an event to occur on one or more file descriptors or for the 
+given timeout to expire."
+ (declare (in) (in) (in) (in))
+ (sys:poll-timed nfds nfds_revents timeout errno))
+
+(defun flock (fd operation)
+ "Performs a file locking operation on the file descriptor fd."
+ (declare (in) (in) (in))
+ (sys:flock fd operation))
+
+(defun fcntl64 (fd request action)
+ "Performs a file descriptor control operation on the file descriptor fd 
+with 64-bit offsets."
+ (declare (in) (in) (in) (in))
+ (sys:fcntl64 fd request action))
+
+(defun ioctl (fd request action)
+ "Performs an ioctl operation on the file descriptor fd."
+ (declare (in) (in) (in) (in))
+ (sys:ioctl fd request action))
+
+(defun pselect (nfds nfds_revents timeout_sec timeout_nsec)
+ "Waits for an event to occur on one or more file descriptors with a 
+timestamp."
+ (declare (in) (in) (in) (in) (in))
+ (sys:pselect nfds nfds_revents timeout_sec timeout_nsec))
+
+(defun pselect6 (nfds nfds_revents timeout_sec timeout_nsec)
+ "Waits for an event to occur on one or more file descriptors with a 
+timestamp in 64-bit mode."
+ (declare (in) (in) (in) (in) (in))
+ (sys:pselect6 nfds nfds_revents timeout_sec timeout_nsec))
+
+(defun pselect7 (nfds nfds_revents timeout_sec timeout_nsec)
+ "Waits for an event to occur on one or more file descriptors with a 
+timestamp in 64-bit mode with nanosecond resolution."
+ (declare (in) (in) (in) (in) (in))
+ (sys:pselect7 nfds nfds_revents timeout_sec timeout_nsec))
+
+(defun setsockopt (s socket_level socket_opt_name socket_opt_val_size 
+socket_opt_val)
+ "Sets a socket option."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:setsockopt s socket_level socket_opt_name socket_opt_val_size 
+socket_opt_val))
+
+(defun getsockopt (s socket_level socket_opt_name socket_opt_val_size 
+&optional (socket_opt_val (make-array socket_opt_val_size :element-type 
+'schar)))
+ "Gets a socket option."
+ (declare (in) (in) (in) (in) (in) (in) (in) (out))
+ (sys:getsockopt s socket_level socket_opt_name socket_opt_val_size 
+socket_opt_val))
+
+(defun setsockopt6 (s socket_level socket_opt_name socket_opt_val_size 
+socket_opt_val)
+ "Sets a socket option with 64-bit integers."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:setsockopt6 s socket_level socket_opt_name socket_opt_val_size 
+socket_opt_val))
+
+(defun getsockopt6 (s socket_level socket_opt_name socket_opt_val_size 
+&optional (socket_opt_val (make-array socket_opt_val_size :element-type 
+'schar)))
+ "Gets a socket option with 64-bit integers."
+ (declare (in) (in) (in) (in) (in) (in) (in) (out))
+ (sys:getsockopt6 s socket_level socket_opt_name socket_opt_val_size 
+socket_opt_val))
+
+(defun setsockopt7 (s socket_level socket_opt_name socket_opt_val_size 
+socket_opt_val)
+ "Sets a socket option with 64-bit integers with nanosecond resolution."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:setsockopt7 s socket_level socket_opt_name socket_opt_val_size 
+socket_opt_val))
+
+(defun getsockopt7 (s socket_level socket_opt_name socket_opt_val_size 
+&optional (socket_opt_val (make-array socket_opt_val_size :element-type 
+'schar)))
+ "Gets a socket option with 64-bit integers with nanosecond resolution."
+ (declare (in) (in) (in) (in) (in) (in) (in) (out))
+ (sys:getsockopt7 s socket_level socket_opt_name socket_opt_val_size 
+socket_opt_val))
+
+(defun sendto (s buf len to_addr)
+ "Sends data to a socket."
+ (declare (in) (in) (in) (in) (in) (in) (in) (in))
+ (sys:sendto s buf len to_addr))
+
+(defun recvfrom (s buf len from_addr)
+ "Receives data from a socket."
+ (declare (in) (in) (in) (in) (in) (in) (in) (in))
+ (sys:recvfrom s buf len from_addr))
+
+(defun send (s buf len)
+ "Sends data to a socket."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:send s buf len))
+
+(defun recv (s buf len)
+ "Receives data from a socket."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:recv s buf len))
+
+(defun sendto6 (s buf len to_addr)
+ "Sends data to a socket with 128-bit IPv6 addresses."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:sendto6 s buf len to_addr))
+
+(defun recvfrom6 (s buf len &key (from_addr (make-array 16 :element-type 
+'schar)))
+ "Receives data from a socket with 128-bit IPv6 addresses."
+ (declare (in) (in) (in) (in) (in) (in) (in) (in))
+ (sys:recvfrom6 s buf len from_addr))
+
+(defun send (s buf len)
+ "Sends data to a socket with 128-bit IPv6 addresses."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:send s buf len))
+
+(defun recv (s buf len)
+ "Receives data from a socket with 128-bit IPv6 addresses."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:recv s buf len))
+
+(defun getpeername (s)
+ "Gets the address of the peer to which a socket is connected."
+ (declare (in) (in) (in))
+ (sys:getpeername s))
+
+(defun getsockname (s)
+ "Gets the local address of the socket."
+ (declare (in) (in) (in))
+ (sys:getsockname s))
+
+(defun shutdown (s how)
+ "Shuts down a socket."
+ (declare (in) (in) (in))
+ (sys:shutdown s how))
+
+(defun listen (s backlog)
+ "Makes a socket listen for incoming connections."
+ (declare (in) (in) (in))
+ (sys:listen s backlog))
+
+(defun accept (s)
+ "Waits for an incoming connection on a socket and returns a new socket to 
+handle the connection."
+ (declare (in) (in) (in))
+ (sys:accept s))
+
+(defun select (nfds fds &key (tv nil) (tvp t) (exclusivep nil) (cancel-fds 
+nil) (errdep t) (errhandler nil))
+ "Waits for I/O to become available on one or more file descriptors."
+ (declare (in) (in) (in) (keyword) (keyword))
+ (sys:select nfds fds tv tvp exclusivep cancel-fds errdep errhandler))
+
+(defun getprotobyname (name)
+ "Gets a protocol number by its name."
+ (declare (in) (in) (in))
+ (sys:getprotobyname name))
+
+(defun getprotobynumber (number)
+ "Gets a protocol name by its number."
+ (declare (in) (in) (in))
+ (sys:getprotobynumber number))
+
+(defun getservbyname (name proto)
+ "Gets a server number by its name and protocol."
+ (declare (in) (in) (in) (in))
+ (sys:getservbyname name proto))
+
+(defun getservbyport (port proto)
+ "Gets a server number by its port and protocol."
+ (declare (in) (in) (in) (in))
+ (sys:getservbyport port proto))
+
+(defun make-socket (domain &key (protocol 0) (type 0))
+ "Creates a socket."
+ (declare (in) (in) (in) (keyword) (keyword))
+ (sys:make-socket domain protocol type))
+
+(defun make-socket6 (domain &key (protocol 0) (type 0))
+ "Creates a socket with IPv6 support."
+ (declare (in) (in) (in) (keyword) (keyword))
+ (sys:make-socket6 domain protocol type))
+
+(defun set-socket-blocking (s blocking)
+ "Sets whether a socket is blocking."
+ (declare (in) (in) (in) (in))
+ (sys:set-socket-blocking s blocking))
+
+(defun set-socket-nonblocking (s)
+ "Sets a socket to non-blocking mode."
+ (declare (in) (in) (in))
+ (sys:set-socket-nonblocking s))
+
+(defun set-socket-blocking? (s)
+ "Returns whether a socket is blocking."
+ (declare (in) (in) (in))
+ (sys:set-socket-blocking s))
+
+(defun set-socket-nonblocking-p (s)
+ "Returns whether a socket is in non-blocking mode."
+ (declare (in) (in) (in))
+ (sys:set-socket-nonblocking-p s))
+
+(defun set-socket-receive-buffer (s size)
+ "Sets the receive buffer size for a socket."
+ (declare (in) (in) (in) (in))
+ (sys:set-socket-receive-buffer s size))
+
+(defun set-socket-send-buffer (s size)
+ "Sets the send buffer size for a socket."
+ (declare (in) (in) (in) (in))
+ (sys:set-socket-send-buffer s size))
+
+(defun socket-type (s)
+ "Gets the type of a socket."
+ (declare (in) (in) (in))
+ (sys:socket-type s))
+
+(defun socket-protocol (s)
+ "Gets the protocol number of a socket."
+ (declare (in) (in) (in))
+ (sys:socket-protocol s))
+
+(defun socket-domain (s)
+ "Gets the domain of a socket."
+ (declare (in) (in) (in))
+ (sys:socket-domain s))
+
+(defun socket-local-address (s)
+ "Gets the local address of a socket."
+ (declare (in) (in) (in))
+ (sys:socket-local-address s))
+
+(defun socket-peer-address (s)
+ "Gets the peer address of a socket."
+ (declare (in) (in) (in))
+ (sys:socket-peer-address s))
+
+(defun socket-reuse-address (s)
+ "Gets whether a socket uses the address from the local address cache."
+ (declare (in) (in) (in))
+ (sys:socket-reuse-address s))
+
+(defun socket-reuse-port (s)
+ "Gets whether a socket uses the port from the local port cache."
+ (declare (in) (in) (in))
+ (sys:socket-reuse-port s))
+
+(defun socket-connect (s address port)
+ "Attempts to connect the socket to the given host and port."
+ (declare (in) (in) (in) (in) (in))
+ (sys:socket-connect s address port))
+
+(defun socket-connect-to (s host port)
+ "Attempts to connect the socket to the given host and port."
+ (declare (in) (in) (in) (in) (in))
+ (sys:socket-connect-to s host port))
+
+(defun socket-listen (s backlog)
+ "Attempts to listen for incoming connections on the socket."
+ (declare (in) (in) (in) (in))
+ (sys:socket-listen s backlog))
+
+(defun socket-accept (s)
+ "Wait for an incoming connection on a socket and return a new socket to 
+handle the connection."
+ (declare (in) (in) (in))
+ (sys:socket-accept s))
+
+(defun socket-send (s buf &key (flags 0) (p 0) (ms 0))
+ "Sends a buffer over a socket."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:socket-send s buf flags p ms))
+
+(defun socket-receive (s buf &key (flags 0) (p 0) (ms 0))
+ "Receives a buffer from a socket."
+ (declare (in) (in) (in) (in) (in) (in) (in))
+ (sys:socket-receive s buf flags p ms))
+
+(defun socket-shutdown (s how)
+ "Shuts down a socket."
+ (declare (in) (in) (in) (in))
+ (sys:socket-shutdown s how))
+
+(defun socket-close (s)
+ "Closes a socket."
+ (declare (in) (in) (in))
+ (sys:socket-close s))
+
+(defun socket-errno (s)
+ "Gets the error number of the last socket operation."
+ (declare (in) (in) (in))
+ (sys:socket-errno s))
+
+(defun socket-strerror (errnum)
+ "Gets a string representation of the given error number."
+ (declare (in) (in) (in))
+ (sys:socket-strerror errnum))
+
+(defun socket-getpeername (s)
+ "Gets the peer name of a socket."
+ (declare (in) (in) (in))
+ (sys:socket-getpeername s))
+
+(defun socket-getsockname (s)
+ "Gets the local address of a socket."
+ (declare (in) (in) (in))
+ (sys:socket-getsockname s))
+
+(defun socket-getsockopt (s level name)
+ "Gets the value of a socket option."
+ (declare (in) (in) (in) (in) (in))
+ (sys:socket-getsockopt s level name))
+
+(defun socket-setsockopt (s level name value)
+ "Sets the value of a socket option."
+ (declare (in) (in) (in) (in) (in))
+ (sys:socket-setsockopt s level name value))
+
+(defun socket-getnameinfo (s how name port)
+ "Gets the name and port information associated with a socket."
+ (declare (in) (in) (in) (in) (in))
+ (sys:socket-getnameinfo s how name port))
+
+(defun socket-setblocking (s blocking)
+ "Sets the blocking status of a socket."
+ (declare (in) (in) (in) (in))
+ (sys:socket-setblocking s blocking))
+
+(defun socket-getblocking (s)
+ "Gets the blocking status of a socket."
+ (declare (in) (in) (in))
+ (sys:socket-getblocking s))

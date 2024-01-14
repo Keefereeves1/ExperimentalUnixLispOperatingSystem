@@ -1,0 +1,21 @@
+(defun make-terminal ()
+ (let ((terminal-window (make-instance 'terminal-window)))
+    (setf (terminal-title terminal-window) "Portacle Terminal")
+    (setf (terminal-size terminal-window) (cons 80 24))
+    (setf (terminal-emulator terminal-window) "x-terminal-emulator")
+    (setf (terminal-colors terminal-window) (list (list 8 8 8) (list 188 
+188 188) (list 255 255 255)))
+    (setf (terminal-prompt-char terminal-window) #\>)))
+
+(defun run-terminal ()
+ (with-open-file (stream stdout terminal-window :direction :output)
+    (format stream "~%Welcome to the Portacle Terminal!~%~%~%")
+    (terpri stream)
+    (terpri stream)
+    (terpri stream)
+    (setf (terminal-pager terminal-window) (make-instance 
+'terminal-pager-standard))))
+
+(make-terminal)
+(run-terminal)
+(interactive)
